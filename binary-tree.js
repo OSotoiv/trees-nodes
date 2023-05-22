@@ -103,21 +103,90 @@ class BinaryTree {
    * (i.e. are at the same level but have different parents. ) */
 
   areCousins(node1, node2) {
+    // Queue to perform level order traversal
+    const queue = [];
+    queue.push({ node: this.root, parent: null, level: 0 });
+
+    // Variables to store parent and level of node1 and node2
+    let parent1 = null;
+    let parent2 = null;
+    let level1 = -1;
+    let level2 = -1;
+
+    while (queue.length > 0) {
+      const { node, parent, level } = queue.shift();
+
+      // Check if node1 or node2 is found
+      if (node === node1) {
+        parent1 = parent;
+        level1 = level;
+      }
+      if (node === node2) {
+        parent2 = parent;
+        level2 = level;
+      }
+
+      // Add left and right children to the queue
+      if (node.left) {
+        queue.push({ node: node.left, parent: node, level: level + 1 });
+      }
+      if (node.right) {
+        queue.push({ node: node.right, parent: node, level: level + 1 });
+      }
+    }
+
+    // Check if both nodes are found and have the same level but different parents
+    return level1 === level2 && parent1 !== parent2;
 
   }
 
   /** Further study!
    * serialize(tree): serialize the BinaryTree object tree into a string. */
 
-  static serialize() {
+  static serialize(tree) {
+    const serializedTree = [];
 
+    function preorderSerialize(node) {
+      if (node === null) {
+        serializedTree.push('null');
+        return;
+      }
+
+      serializedTree.push(node.val.toString());
+      preorderSerialize(node.left);
+      preorderSerialize(node.right);
+    }
+
+    preorderSerialize(tree.root);
+    return '[' + serializedTree.join(',') + ']';
   }
 
   /** Further study!
    * deserialize(stringTree): deserialize stringTree into a BinaryTree object. */
 
-  static deserialize() {
+  static deserialize(stringTree) {
+    if (!stringTree || stringTree === '[]') {
+      return null;
+    }
 
+    const arr = JSON.parse(stringTree);
+    let index = 0;
+
+    function buildTree() {
+      if (index >= arr.length || arr[index] === 'null') {
+        index++;
+        return null;
+      }
+
+      const node = new BinaryTreeNode(parseInt(arr[index]));
+      index++;
+      node.left = buildTree();
+      node.right = buildTree();
+
+      return node;
+    }
+
+    return new BinaryTree(buildTree());
   }
 
   /** Further study!
